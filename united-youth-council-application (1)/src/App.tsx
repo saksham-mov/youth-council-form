@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  ArrowRight, 
-  Check, 
-  Globe, 
-  Sparkles, 
-  Rocket, 
-  Mail, 
-  User, 
-  MapPin, 
+import {
+  ArrowRight,
+  Check,
+  Globe,
+  Sparkles,
+  Rocket,
+  Mail,
+  User,
+  MapPin,
   Calendar,
   BookOpen,
   Zap,
@@ -103,7 +103,7 @@ export default function App() {
 
   const validateStep = () => {
     const newErrors: Partial<Record<keyof FormData, string>> = {};
-    
+
     if (step === 2) {
       if (!formData.fullName.trim()) newErrors.fullName = 'Please enter your full name';
       if (!formData.email.trim() || !/^\S+@\S+\.\S+$/.test(formData.email)) newErrors.email = 'Please enter a valid email';
@@ -134,11 +134,39 @@ export default function App() {
     e.preventDefault();
     if (!validateStep()) return;
 
+    // Prepare payload matching Apps Script expectations
+    const payload = {
+      name: formData.fullName,
+      email: formData.email,
+      age: formData.age,
+      country: formData.country,
+      city: formData.city,
+      whyJoin: formData.whyYou,
+      causes: formData.causes,
+      commitment: formData.commitment,
+      vision: formData.vision,
+      portfolio: formData.workLink,
+    };
+
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsSubmitting(false);
-    setStep(6);
+    try {
+      const response = await fetch('https://script.google.com/macros/s/AKfycbxIxDKT8lHdJBLm5HNsNLkPSnxrbMaTsvDHdtEJRRt5MSsxL7rVqtzipK4vsuVaan8TAQ/exec', {
+        method: 'POST',
+        mode: 'no-cors', // Apps Script Web Apps accept no-cors; response handling limited
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      // Since no-cors, we cannot read response body; assume success if no error thrown
+      console.log('Form submitted');
+    } catch (err) {
+      console.error('Submission error', err);
+      // Optionally, you could set an error state to display to user
+    } finally {
+      setIsSubmitting(false);
+      setStep(6); // Show success screen
+    }
   };
 
   const updateField = (field: keyof FormData, value: any) => {
@@ -203,17 +231,17 @@ export default function App() {
                   BECOME A <br />
                   <span className="text-accent relative">
                     YOUTH UNITER
-                    <motion.div 
+                    <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: '100%' }}
                       transition={{ delay: 0.8, duration: 0.8, ease: "easeOut" }}
-                      className="absolute -bottom-1 md:-bottom-2 left-0 h-2 md:h-4 bg-accent/20 -z-10" 
+                      className="absolute -bottom-1 md:-bottom-2 left-0 h-2 md:h-4 bg-accent/20 -z-10"
                     />
-                    <motion.div 
+                    <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: '100%' }}
                       transition={{ delay: 1, duration: 0.6, ease: "easeOut" }}
-                      className="absolute bottom-0 md:-bottom-1 left-0 h-1 md:h-2 bg-accent" 
+                      className="absolute bottom-0 md:-bottom-1 left-0 h-1 md:h-2 bg-accent"
                     />
                   </span>
                 </h1>
@@ -434,11 +462,10 @@ export default function App() {
                         whileHover={{ scale: 1.02, y: -4 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => toggleCause(cause.id)}
-                        className={`group flex flex-col items-start p-5 md:p-6 transition-all duration-300 border-2 text-left space-y-3 md:space-y-4 ${
-                          isSelected 
-                            ? 'bg-accent/5 border-accent shadow-xl shadow-accent/10' 
+                        className={`group flex flex-col items-start p-5 md:p-6 transition-all duration-300 border-2 text-left space-y-3 md:space-y-4 ${isSelected
+                            ? 'bg-accent/5 border-accent shadow-xl shadow-accent/10'
                             : 'bg-white border-warm/30 hover:border-accent/50'
-                        }`}
+                          }`}
                         style={{ borderRadius: '0px' }}
                       >
                         <div className="flex items-center justify-between w-full">
@@ -528,9 +555,8 @@ export default function App() {
                         onChange={(e) => updateField('commitment', e.target.checked)}
                         className="sr-only"
                       />
-                      <div className={`w-5 h-5 md:w-6 md:h-6 border-2 transition-all duration-200 ${
-                        formData.commitment ? 'bg-accent border-accent' : 'border-warm group-hover:border-accent'
-                      }`} style={{ borderRadius: '0px' }}>
+                      <div className={`w-5 h-5 md:w-6 md:h-6 border-2 transition-all duration-200 ${formData.commitment ? 'bg-accent border-accent' : 'border-warm group-hover:border-accent'
+                        }`} style={{ borderRadius: '0px' }}>
                         <AnimatePresence>
                           {formData.commitment && (
                             <motion.div
@@ -639,7 +665,7 @@ export default function App() {
                 </motion.div>
 
                 <div className="space-y-4">
-                  <motion.h2 
+                  <motion.h2
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 }}
@@ -647,7 +673,7 @@ export default function App() {
                   >
                     YOU DID IT!
                   </motion.h2>
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.6 }}
@@ -658,7 +684,7 @@ export default function App() {
                   </motion.p>
                 </div>
 
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.8 }}
@@ -678,9 +704,9 @@ export default function App() {
                   </div>
 
                   <div className="flex flex-col items-center gap-4">
-                    <a 
-                      href="https://instagram.com/UnitEdYouthCouncil" 
-                      target="_blank" 
+                    <a
+                      href="https://instagram.com/UnitEdYouthCouncil"
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-accent hover:text-accent/80 transition-colors font-display font-bold text-lg"
                     >
@@ -710,9 +736,9 @@ export default function App() {
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
         {step === 1 ? (
           <div className="absolute inset-0">
-            <img 
-              src="https://picsum.photos/seed/united-youth/1920/1080?blur=2" 
-              alt="Background" 
+            <img
+              src="https://picsum.photos/seed/united-youth/1920/1080?blur=2"
+              alt="Background"
               className="w-full h-full object-cover opacity-20 grayscale"
               referrerPolicy="no-referrer"
             />
