@@ -88,6 +88,7 @@ export default function App() {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<FormData>(INITIAL_DATA);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
 
   const nextStep = () => {
@@ -136,6 +137,7 @@ export default function App() {
     if (!validateStep()) return;
 
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
       const { error } = await supabase
         .from('applications')
@@ -159,12 +161,12 @@ export default function App() {
       }
 
       console.log('Form submitted successfully to Supabase');
-    } catch (err) {
+      setStep(6); // Only show success screen if no error
+    } catch (err: any) {
       console.error('Submission error:', err);
-      // Optionally, you could set an error state to display to user
+      setSubmitError(err.message || 'An error occurred while submitting. Please try again.');
     } finally {
       setIsSubmitting(false);
-      setStep(6); // Show success screen
     }
   };
 
@@ -638,6 +640,11 @@ export default function App() {
                     )}
                   </button>
                 </div>
+                {submitError && (
+                  <div className="p-4 bg-red-500/10 border border-red-500/50 text-red-500 text-sm text-center">
+                    {submitError}
+                  </div>
+                )}
               </form>
             </motion.div>
           )}

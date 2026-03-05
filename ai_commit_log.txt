@@ -1,2 +1,3 @@
 2026-03-05 16:54:48 | AI update: applied changes from Antigravity | 360047589217d35b708854d659507054ed1c9e7f
 2026-03-05 17:02:22 | chore: move all files from subdirectory to root to resolve Vercel 404 | d37fcad364b54dd823f35ce5f52e2d0bcc769fb1
+2026-03-05 17:27:58 | feat: integrate Supabase for form submissions | 0e86f0d694bbe7b5f62dd87aea5a187ffc399f12
