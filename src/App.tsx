@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { supabase } from './lib/supabase';
 import {
   ArrowRight,
   Check,
@@ -134,34 +135,32 @@ export default function App() {
     e.preventDefault();
     if (!validateStep()) return;
 
-    // Prepare payload matching Apps Script expectations
-    const payload = {
-      name: formData.fullName,
-      email: formData.email,
-      age: formData.age,
-      country: formData.country,
-      city: formData.city,
-      whyJoin: formData.whyYou,
-      causes: formData.causes,
-      commitment: formData.commitment,
-      vision: formData.vision,
-      portfolio: formData.workLink,
-    };
-
     setIsSubmitting(true);
     try {
-      const response = await fetch('https://script.google.com/macros/s/AKfycbxIxDKT8lHdJBLm5HNsNLkPSnxrbMaTsvDHdtEJRRt5MSsxL7rVqtzipK4vsuVaan8TAQ/exec', {
-        method: 'POST',
-        mode: 'no-cors', // Apps Script Web Apps accept no-cors; response handling limited
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-      // Since no-cors, we cannot read response body; assume success if no error thrown
-      console.log('Form submitted');
+      const { error } = await supabase
+        .from('applications')
+        .insert([
+          {
+            name: formData.fullName,
+            email: formData.email,
+            age: parseInt(formData.age), // Match SQL schema
+            country: formData.country,
+            city: formData.city,
+            why_join: formData.whyYou, // Match SQL schema
+            causes: formData.causes,
+            commitment: formData.commitment,
+            vision: formData.vision,
+            portfolio_link: formData.workLink, // Match SQL schema
+          }
+        ]);
+
+      if (error) {
+        throw error;
+      }
+
+      console.log('Form submitted successfully to Supabase');
     } catch (err) {
-      console.error('Submission error', err);
+      console.error('Submission error:', err);
       // Optionally, you could set an error state to display to user
     } finally {
       setIsSubmitting(false);
@@ -463,8 +462,8 @@ export default function App() {
                         whileTap={{ scale: 0.98 }}
                         onClick={() => toggleCause(cause.id)}
                         className={`group flex flex-col items-start p-5 md:p-6 transition-all duration-300 border-2 text-left space-y-3 md:space-y-4 ${isSelected
-                            ? 'bg-accent/5 border-accent shadow-xl shadow-accent/10'
-                            : 'bg-white border-warm/30 hover:border-accent/50'
+                          ? 'bg-accent/5 border-accent shadow-xl shadow-accent/10'
+                          : 'bg-white border-warm/30 hover:border-accent/50'
                           }`}
                         style={{ borderRadius: '0px' }}
                       >
